@@ -2,8 +2,24 @@ import fs from "fs";
 
 function main() {
   const args = process.argv.slice(2);
+
+  if (args.length !== 2) {
+    console.error("Usage: node page-rank.js <input_file> <damping_factor>");
+    process.exit(1);
+  }
+
   const inputFile = args[0];
   const d = parseFloat(args[1]);
+
+  if (!fs.existsSync(inputFile)) {
+    console.error("File not found: " + inputFile);
+    process.exit(1);
+  }
+
+  if (isNaN(d) || d < 0 || d > 1) {
+    console.error("Damping factor must be a number between 0 and 1");
+    process.exit(1);
+  }
 
   const data = fs
     .readFileSync(inputFile, "utf8")
@@ -12,30 +28,49 @@ function main() {
 
   const adjacency = {};
   const inlinks = {};
-  const nodesSet = new Set();
+  const srcSet = new Set();
 
-  for (const line of data) {
+  data.map((line, lineNumber) => {
     const [sourceStr, targetsStr] = line.split(":");
-    const source = parseInt(sourceStr.trim());
-    nodesSet.add(source);
+    if (!sourceStr || !targetsStr) {
+      console.error(`Invalid input format on ${lineNumber + 1}: ${line}`);
+      process.exit(1);
+    }
+
+    const src = parseInt(sourceStr.trim());
+    if (isNaN(src)) {
+      console.error(
+        `Invalid source node on ${lineNumber + 1}: ${line} - ${sourceStr} is not a number`,
+      );
+      process.exit(1);
+    }
+    srcSet.add(src);
+
     const targets = targetsStr
       .trim()
       .split(",")
       .map((t) => parseInt(t.trim()));
-    adjacency[source] = targets;
-    targets.forEach((target) => {
-      nodesSet.add(target);
+    if (targets.some((t) => isNaN(t))) {
+      console.error(
+        `Invalid target node on ${lineNumber + 1}: ${line} - ${targetsStr} contains non-numeric values`,
+      );
+      process.exit(1);
+    }
+    adjacency[src] = targets;
+
+    targets.map((target) => {
+      srcSet.add(target);
       if (!inlinks[target]) {
         inlinks[target] = [];
       }
-      inlinks[target].push(source);
+      inlinks[target].push(src);
     });
-  }
+  });
 
-  const sortedNodes = Array.from(nodesSet).sort((a, b) => a - b);
+  const sortedNodes = Array.from(srcSet).sort((a, b) => a - b);
   const n = sortedNodes.length;
   const nodeIndexMap = new Map();
-  sortedNodes.forEach((node, index) => nodeIndexMap.set(node, index));
+  sortedNodes.map((node, index) => nodeIndexMap.set(node, index));
 
   const sinks = sortedNodes.filter((node) => {
     const edges = adjacency[node];
@@ -75,12 +110,9 @@ function main() {
     pr = newPR;
   }
 
-  const outputFile = args[2];
-  const output = sortedNodes
-    .map((_node, index) => pr[index].toExponential(10))
-    .join("\n");
-
-  fs.writeFileSync(outputFile, output, "utf8");
+  sortedNodes.map((node, index) => {
+    console.log(pr[index].toExponential(10));
+  });
 }
 
 main();
