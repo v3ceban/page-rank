@@ -26,25 +26,25 @@ function main() {
     .split("\n")
     .filter((line) => line.trim() !== "");
 
-  const adjacency = {};
+  const graph = {};
   const inlinks = {};
-  const srcSet = new Set();
+  const vertexSet = new Set();
 
   data.map((line, lineNumber) => {
-    const [sourceStr, targetsStr] = line.split(":");
-    if (!sourceStr || !targetsStr) {
+    const [vertexStr, targetsStr] = line.split(":");
+    if (!vertexStr || !targetsStr) {
       console.error(`Invalid input format on ${lineNumber + 1}: ${line}`);
       process.exit(1);
     }
 
-    const src = parseInt(sourceStr.trim());
-    if (isNaN(src)) {
+    const vertex = parseInt(vertexStr.trim());
+    if (isNaN(vertex)) {
       console.error(
-        `Invalid source node on ${lineNumber + 1}: ${line} - ${sourceStr} is not a number`,
+        `Invalid source node on ${lineNumber + 1}: ${line} - ${vertexStr} is not a number`,
       );
       process.exit(1);
     }
-    srcSet.add(src);
+    vertexSet.add(vertex);
 
     const targets = targetsStr
       .trim()
@@ -56,24 +56,24 @@ function main() {
       );
       process.exit(1);
     }
-    adjacency[src] = targets;
+    graph[vertex] = targets;
 
     targets.map((target) => {
-      srcSet.add(target);
+      vertexSet.add(target);
       if (!inlinks[target]) {
         inlinks[target] = [];
       }
-      inlinks[target].push(src);
+      inlinks[target].push(vertex);
     });
   });
 
-  const sortedNodes = Array.from(srcSet).sort((a, b) => a - b);
+  const sortedNodes = Array.from(vertexSet).sort((a, b) => a - b);
   const n = sortedNodes.length;
   const nodeIndexMap = new Map();
   sortedNodes.map((node, index) => nodeIndexMap.set(node, index));
 
   const sinks = sortedNodes.filter((node) => {
-    const edges = adjacency[node];
+    const edges = graph[node];
     return !edges || edges.length === 0;
   });
 
@@ -95,10 +95,11 @@ function main() {
       const ilist = inlinks[j] || [];
       for (const i of ilist) {
         const iIndex = nodeIndexMap.get(i);
-        const L_i = adjacency[i].length;
+        const L_i = graph[i].length;
         sum_inlinks += pr[iIndex] / L_i;
       }
-      newPR[jIndex] = d / n + (1 - d) * (sum_inlinks + S);
+      //newPR[jIndex] = d / n + (1 - d) * (sum_inlinks + S);
+      newPR[jIndex] = d * (sum_inlinks + S) + (1 - d) / n;
     }
 
     let maxDiff = 0;
@@ -113,6 +114,10 @@ function main() {
   sortedNodes.map((node, index) => {
     console.log(pr[index].toExponential(10));
   });
+
+  console.log(
+    "sum: " + pr.reduce((acc, val) => acc + val, 0).toExponential(10),
+  );
 }
 
 main();
