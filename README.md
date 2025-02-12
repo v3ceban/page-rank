@@ -7,10 +7,26 @@ Web Information Management, Santa Clara University, Winter 2025.
 
 - Node.js 18 or later
 
-## Installation
+## Installation and Usage
 
 1. Clone and cd into the repository
-2. Run `main.js` file with `node main.js` or `./main.js`
+2. Run `main.js` file with
+
+   ```bash
+   node main.js
+   ```
+
+   or
+
+   ```bash
+   ./main.js
+   ```
+
+   or
+
+   ```bash
+   npm run page-rank
+   ```
 
 ## Functions
 
