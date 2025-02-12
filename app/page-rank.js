@@ -11,8 +11,6 @@
  * @returns {string[]} Array of PageRank values in scientific notation with 10 decimal places,
  *                     corresponding to the nodes in the input data.
  *
- * @throws {Error} If the input data contains invalid node numbers or incorrect format.
- *
  * @description
  * The algorithm:
  * 1. Builds the graph structure from input data
@@ -35,33 +33,21 @@ export const getPageRank = (data, d) => {
   const nodeSet = new Set();
   const Tolerance = 1e-10;
 
-  data.forEach((line, lineNumber) => {
+  data.forEach((line) => {
     const [sourceStr, targetsStr] = line.split(":");
 
     if (!sourceStr || !targetsStr) {
       return;
     }
 
-    const sourceNode = parseInt(sourceStr.trim());
-
-    if (isNaN(sourceNode)) {
-      throw new Error(
-        `Invalid source node on line ${lineNumber + 1}: ${line} - "${sourceStr}" is not a number`,
-      );
-    }
+    const sourceNode = sourceStr.trim();
 
     nodeSet.add(sourceNode);
 
     const targetNodes = targetsStr
       .trim()
       .split(",")
-      .map((t) => parseInt(t.trim()));
-
-    if (targetNodes.some((t) => isNaN(t))) {
-      throw new Error(
-        `Invalid target node on line ${lineNumber + 1}: ${line} - "${targetsStr}" contains non-numeric values`,
-      );
-    }
+      .map((t) => t.trim());
 
     outLinks[sourceNode] = targetNodes;
 
@@ -74,7 +60,9 @@ export const getPageRank = (data, d) => {
     });
   });
 
-  const sortedNodes = Array.from(nodeSet).sort((a, b) => a - b);
+  const sortedNodes = Array.from(nodeSet).sort((a, b) =>
+    isNaN(a) || isNaN(b) ? a.localeCompare(b) : Number(a) - Number(b),
+  );
   const nodeCount = sortedNodes.length;
   const nodeIndexMap = new Map();
   sortedNodes.forEach((node, index) => nodeIndexMap.set(node, index));
