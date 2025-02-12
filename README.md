@@ -27,22 +27,23 @@ Web Information Management, Santa Clara University, Winter 2025
    ```bash
    npm run page-rank input.txt 0.85
    ```
-   
+
 > [!IMPORTANT]
+>
 > **Input file format**
-> 
+>
 > Program expects a text graph where each line is a string that represents a signle node in the following format:
 >
->  ```
->  source:target1,target2,...
->  ```
+> ```
+> source:target1,target2,...
+> ```
 >
->  where:
-> 
+> where:
+>
 > - `source` is the source node identifier
 > - `target1,target2,...` is the comma separated list of node identifiers the source node links to
-> 
-> **Wrong input file format may results in unexpected errors** 
+>
+> **Wrong input file format may results in unexpected errors**
 
 ## Functions
 
@@ -102,7 +103,7 @@ Process exits with:
    - `PR(i)` is the PageRank of nodes linking to p
    - `C(i)` is the number of outbound links from node i
    - `ds` is the score from dangling nodes
-  
+
 #### Params
 
 | Param  | Type        | Description                                                                                            |
