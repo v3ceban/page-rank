@@ -3,14 +3,28 @@
 PageRank algorithm implementation in JavaScript for CSEN 169 -
 Web Information Management, Santa Clara University, Winter 2025.
 
-## main() ⇒ `void`
+## Dependencies
+
+- Node.js 18 or later
+
+## Installation
+
+1. Clone and cd into the repository
+2. Run `main.js` file with `node main.js` or `./main.js`
+
+## Functions
+
+### main() ⇒ `void`
+
+#### Description
 
 Reads a network graph from a text file and calculates PageRank values using a specified damping factor.
-Input file format: Each line represents edges in format `source: target1,target2,...`.
+Input file format: Each line represents edges in format `source:target1,target2,...`,
+where `source` is the node number and `target1,target2,...` are the node numbers it links to.
 
-### Returns
+#### Returns
 
-Returns `void` and prints:
+Always returns `void` and prints:
 
 - PageRank values to stdout, one per line in scientific notation
   with 10 decimal places precision.
@@ -26,21 +40,21 @@ Process exits with:
 - 0 on success
 - 1 on error (with error message to stderr)
 
-### Example usage
+#### Example usage
 
 ```bash
 # reads input.txt and calculates PageRank with damping factor 0.85, printing to stdout
-node page-rank.js input.txt 0.85
+./page-rank.js input.txt 0.85
 ```
 
 ```bash
 # reads input.txt and calculates PageRank with damping factor 0.85, printing to output.txt
-node page-rank.js input.txt 0.85 > output.txt
+./page-rank.js input.txt 0.85 > output.txt
 ```
 
-## getPageRank ⇒ `Array.&lt;string&gt;`
+### getPageRank ⇒ `string []`
 
-### Description
+#### Description
 
 1. Builds the graph structure from input data
 2. Identifies dangling nodes (nodes with no outgoing links)
@@ -53,18 +67,18 @@ node page-rank.js input.txt 0.85 > output.txt
    - PR(i) is the PageRank of nodes linking to p
    - C(i) is the number of outbound links from node i
 
-### Returns
+#### Returns
 
-`Array.&lt;string&gt;`: array of PageRank values in scientific notation with 10 decimal places,
+`string []` - an array of PageRank values in scientific notation with 10 decimal places,
 corresponding to the nodes in the input data.
 
-### Throws
+#### Throws
 
 Error if the input data contains invalid node numbers or incorrect format.
 
-### Params
+#### Params
 
-| Param  | Type                   | Description                                                                                                                                           |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `data` | `Array.&lt;string&gt;` | Array of strings representing nodes in format `source:target1,target2,...`                                                                            |
-| `d`    | `number`               | Damping factor (float between `0` and `1`, typically `0.85`), representing the probability of following a link (d) or jumping to a random node (1-d). |
+| Param  | Type        | Description                                                                                                                                           |
+| ------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data` | `string []` | Array of strings representing nodes in format `source:target1,target2,...`                                                                            |
+| `d`    | `number`    | Damping factor (float between `0` and `1`, typically `0.85`), representing the probability of following a link (d) or jumping to a random node (1-d). |
