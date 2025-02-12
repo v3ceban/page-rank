@@ -32,7 +32,7 @@ Web Information Management, Santa Clara University, Winter 2025
 >
 > **Input file format**
 >
-> Program expects a text graph where each line is a string that represents a signle node in the following format:
+> Program expects a text graph where each line is a string that represents a single node in the following format:
 >
 > ```
 > source:target1,target2,...
