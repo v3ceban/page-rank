@@ -10,7 +10,25 @@ Web Information Management, Santa Clara University, Winter 2025
 ## Installation and Usage
 
 1. Clone and cd into the repository
-2. Run `main.js` file with
+2. Get a dataset or generate one with
+
+   ```bash
+    node make-dataset.js 100 input.txt
+   ```
+
+   or
+
+   ```bash
+    ./make-dataset.js 100 input.txt
+   ```
+
+   or with npm
+
+   ```bash
+    npm run dataset 100 input.txt
+   ```
+
+3. Run `main.js` file with
 
    ```bash
    node main.js input.txt 0.85
@@ -20,6 +38,12 @@ Web Information Management, Santa Clara University, Winter 2025
 
    ```bash
    ./main.js input.txt 0.85
+   ```
+
+   or with npm
+
+   ```bash
+    npm run rank input.txt 0.85
    ```
 
 > [!IMPORTANT]
@@ -82,7 +106,7 @@ Process exits with:
 - 0 on success
 - 1 on error (with error message to stderr)
 
-### getPageRank ⇒ `string []`
+### getPageRank ⇒ `Object`
 
 #### Description
 
@@ -107,5 +131,63 @@ Process exits with:
 
 #### Returns
 
-Given correct input, returns `string []` of PageRank values in scientific notation with 10 decimal places,
-corresponding to the nodes in the input data
+Given correct input dataset, returns an object with the following properties:
+
+- `iterations: number`: Number of iterations it took until convergence
+- `sum: number`: Sum of all PageRank values
+- `pageRank: string[]`: PageRank values in scientific notation with 10 decimal places,
+  corresponding to the nodes in the input data
+
+### makeDataset ⇒ `void`
+
+#### Description
+
+Generates a random directed graph dataset suitable for PageRank testing.
+
+The script creates nodes numbered from 0 to n-1, with random outgoing edges.
+Each node is processed with the following characteristics:
+
+- Random number of outgoing edges (1 to maxOutgoing)
+- 2% chance to be a dangling node (no outgoing edges)
+
+#### Params
+
+| Param            | Type     | Description                                | Default |
+| ---------------- | -------- | ------------------------------------------ | ------- |
+| `n`              | `number` | Total number of nodes to generate          | -       |
+| `outputFilename` | `string` | Path where the output file will be written | -       |
+| `maxOutgoing`    | `number` | Maximum number of outgoing edges per node  | 10      |
+
+#### Example Usage
+
+```bash
+# Generate a graph with 100 nodes using default maxOutgoing (10)
+./make-dataset.js 100 input.txt
+
+# Generate a graph with 1000 nodes and max 5 outgoing edges per node
+./make-dataset.js 1000 large-input.txt 5
+```
+
+#### Output Format
+
+Generates a text file where each line follows the format:
+
+```
+source:target1,target2,...
+```
+
+For dangling nodes (no outgoing edges), the line will be:
+
+```
+source:
+```
+
+#### Returns
+
+- Creates the specified output file
+- Exits with code 0 on success
+- Exits with code 1 and prints error to stderr if:
+  - Incorrect number of arguments
+  - Invalid n (must be positive integer)
+  - Invalid maxOutgoing (must be positive integer)
+  - File writing fails

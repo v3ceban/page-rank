@@ -56,7 +56,6 @@ export const getPageRank = (data, d) => {
 
   const outDegrees = new Uint32Array(nodeCount);
   const outLinks = Array.from({ length: nodeCount }, () => []);
-  const inLinks = Array.from({ length: nodeCount }, () => []);
 
   for (const line of data) {
     const colonIndex = line.indexOf(":");
@@ -72,7 +71,6 @@ export const getPageRank = (data, d) => {
     for (const target of targets) {
       const targetIdx = nodeIndexMap.get(target.trim());
       outLinks[sourceIdx].push(targetIdx);
-      inLinks[targetIdx].push(sourceIdx);
     }
     outDegrees[sourceIdx] = targets.length;
   }
@@ -96,24 +94,23 @@ export const getPageRank = (data, d) => {
 
   while (true) {
     iterations++;
+
     let danglingScore = 0;
     for (const nodeIdx of danglingNodes) {
       danglingScore += pageRank[nodeIdx];
     }
     danglingScore = (d * danglingScore) / nodeCount;
 
-    newPageRank.fill(BASE_SCORE);
+    newPageRank.fill(BASE_SCORE + danglingScore);
 
     for (let i = 0; i < nodeCount; i++) {
-      const sources = inLinks[i];
-      let score = 0;
-
-      for (let j = 0; j < sources.length; j++) {
-        const sourceIdx = sources[j];
-        score += pageRank[sourceIdx] / outDegrees[sourceIdx];
+      const outDeg = outDegrees[i];
+      if (outDeg === 0) continue;
+      const contribution = d * (pageRank[i] / outDeg);
+      const targets = outLinks[i];
+      for (let j = 0, tLen = targets.length; j < tLen; j++) {
+        newPageRank[targets[j]] += contribution;
       }
-
-      newPageRank[i] += d * score + danglingScore;
     }
 
     let maxDiff = 0;

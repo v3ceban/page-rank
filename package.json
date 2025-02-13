@@ -1,11 +1,15 @@
 {
-  "name": "search",
+  "name": "page-rank",
   "version": "1.0.0",
-  "description": "",
-  "main": "page-rank.js",
+  "description": "Page Rank Algorithm",
+  "main": "main.js",
   "type": "module",
-  "author": "",
-  "license": "ISC",
+  "author": "Vladimir Ceban",
+  "license": "GPL-3.0",
+  "scripts": {
+    "rank": "node main.js",
+    "dataset": "node make-dataset.js"
+  },
   "devDependencies": {
     "@eslint/js": "^9.20.0",
     "eslint": "^9.20.0",

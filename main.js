@@ -68,8 +68,7 @@ const main = () => {
   }
 
   const {
-    //iterations,
-    //sum,
+    //iterations, sum,
     pageRank,
   } = getPageRank(data, d);
 
