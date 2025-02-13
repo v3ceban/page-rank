@@ -8,8 +8,10 @@
  *                   that represents the probability of following a link (d)
  *                   or jumping to a random node (1-d).
  *
- * @returns {string[]} Array of PageRank values in scientific notation with 10 decimal places,
- *                     corresponding to the nodes in the input data.
+ * @returns {Object} Object containing the following properties:
+ *                   - iterations: Number of iterations it took until convergence
+ *                   - sum: Sum of all PageRank values
+ *                   - pageRank: Array of PageRank values for each node
  *
  * @description
  * The algorithm:
@@ -28,74 +30,90 @@
  * @license GNU GPL v3
  */
 export const getPageRank = (data, d) => {
-  const outLinks = {};
-  const inLinks = {};
   const nodeSet = new Set();
-  const Tolerance = 1e-10;
 
-  data.forEach((line) => {
-    const [sourceStr, targetsStr] = line.split(":");
+  for (const line of data) {
+    const colonIndex = line.indexOf(":");
+    if (colonIndex === -1) continue;
 
-    if (!sourceStr || !targetsStr) {
-      return;
-    }
-
-    const sourceNode = sourceStr.trim();
-
+    const sourceNode = line.slice(0, colonIndex).trim();
     nodeSet.add(sourceNode);
 
-    const targetNodes = targetsStr
+    const targets = line
+      .slice(colonIndex + 1)
       .trim()
-      .split(",")
-      .map((t) => t.trim());
+      .split(",");
+    for (const target of targets) {
+      nodeSet.add(target.trim());
+    }
+  }
 
-    outLinks[sourceNode] = targetNodes;
-
-    targetNodes.forEach((node) => {
-      nodeSet.add(node);
-      if (!inLinks[node]) {
-        inLinks[node] = [];
-      }
-      inLinks[node].push(sourceNode);
-    });
-  });
-
-  const sortedNodes = Array.from(nodeSet).sort((a, b) =>
-    isNaN(a) || isNaN(b) ? a.localeCompare(b) : Number(a) - Number(b),
+  const sortedNodes = [...nodeSet].sort((a, b) =>
+    +a === +a && +b === +b ? +a - +b : a.localeCompare(b),
   );
   const nodeCount = sortedNodes.length;
-  const nodeIndexMap = new Map();
-  sortedNodes.forEach((node, index) => nodeIndexMap.set(node, index));
+  const nodeIndexMap = new Map(sortedNodes.map((node, idx) => [node, idx]));
 
-  const danglingNodes = sortedNodes.filter((node) => {
-    const links = outLinks[node];
-    return !links || links.length === 0;
-  });
+  const outDegrees = new Uint32Array(nodeCount);
+  const outLinks = Array.from({ length: nodeCount }, () => []);
+  const inLinks = Array.from({ length: nodeCount }, () => []);
 
-  let pageRank = new Array(nodeCount).fill(1 / nodeCount);
+  for (const line of data) {
+    const colonIndex = line.indexOf(":");
+    if (colonIndex === -1) continue;
+
+    const sourceNode = line.slice(0, colonIndex).trim();
+    const sourceIdx = nodeIndexMap.get(sourceNode);
+    const targets = line
+      .slice(colonIndex + 1)
+      .trim()
+      .split(",");
+
+    for (const target of targets) {
+      const targetIdx = nodeIndexMap.get(target.trim());
+      outLinks[sourceIdx].push(targetIdx);
+      inLinks[targetIdx].push(sourceIdx);
+    }
+    outDegrees[sourceIdx] = targets.length;
+  }
+
+  const danglingNodes = [];
+  for (let i = 0; i < nodeCount; i++) {
+    if (outDegrees[i] === 0) {
+      danglingNodes.push(i);
+    }
+  }
+
+  const TOLERANCE = 1e-10;
+  const BASE_SCORE = (1 - d) / nodeCount;
+
+  let pageRank = new Float64Array(nodeCount);
+  let newPageRank = new Float64Array(nodeCount);
+  const initialScore = 1 / nodeCount;
+  pageRank.fill(initialScore);
+
+  let iterations = 0;
 
   while (true) {
+    iterations++;
     let danglingScore = 0;
+    for (const nodeIdx of danglingNodes) {
+      danglingScore += pageRank[nodeIdx];
+    }
+    danglingScore = (d * danglingScore) / nodeCount;
 
-    danglingNodes.forEach((node) => {
-      const idx = nodeIndexMap.get(node);
-      danglingScore += pageRank[idx];
-    });
-
-    danglingScore /= nodeCount;
-
-    const newPageRank = new Array(nodeCount).fill(0);
+    newPageRank.fill(BASE_SCORE);
 
     for (let i = 0; i < nodeCount; i++) {
-      const node = sortedNodes[i];
+      const sources = inLinks[i];
       let score = 0;
-      const sources = inLinks[node] || [];
 
-      sources.forEach((src) => {
-        score += pageRank[nodeIndexMap.get(src)] / outLinks[src].length;
-      });
+      for (let j = 0; j < sources.length; j++) {
+        const sourceIdx = sources[j];
+        score += pageRank[sourceIdx] / outDegrees[sourceIdx];
+      }
 
-      newPageRank[i] = d * (score + danglingScore) + (1 - d) / nodeCount;
+      newPageRank[i] += d * score + danglingScore;
     }
 
     let maxDiff = 0;
@@ -103,10 +121,16 @@ export const getPageRank = (data, d) => {
       maxDiff = Math.max(maxDiff, Math.abs(newPageRank[i] - pageRank[i]));
     }
 
-    if (maxDiff < Tolerance) break;
+    if (maxDiff < TOLERANCE) break;
 
-    pageRank = newPageRank;
+    [pageRank, newPageRank] = [newPageRank, pageRank];
   }
 
-  return sortedNodes.map((node, idx) => pageRank[idx].toExponential(10));
+  const sum = pageRank.reduce((acc, val) => acc + val, 0);
+
+  return {
+    iterations,
+    sum,
+    pageRank: Array.from(pageRank, (val) => val.toExponential(10)),
+  };
 };

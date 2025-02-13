@@ -22,12 +22,6 @@ Web Information Management, Santa Clara University, Winter 2025
    ./main.js input.txt 0.85
    ```
 
-   or
-
-   ```bash
-   npm run page-rank input.txt 0.85
-   ```
-
 > [!IMPORTANT]
 >
 > **Input file format**

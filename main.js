@@ -67,18 +67,19 @@ const main = () => {
     process.exit(1);
   }
 
-  try {
-    const pageRank = getPageRank(data, d);
+  const {
+    //iterations,
+    //sum,
+    pageRank,
+  } = getPageRank(data, d);
 
-    pageRank.map((node) => {
-      console.log(node);
-    });
+  pageRank.map((node) => {
+    console.log(node);
+  });
+  //console.log(`Sum: ${sum}`); // sum has to be 1
+  //console.log(`Iterations: ${iterations}`);
 
-    process.exit(0);
-  } catch (e) {
-    console.error(e.message);
-    process.exit(1);
-  }
+  process.exit(0);
 };
 
 main();
