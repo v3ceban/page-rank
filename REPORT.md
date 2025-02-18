@@ -1,4 +1,4 @@
-# Project 1 - PageRank Algorithm
+# PageRank Algorithm
 
 Vladimir Ceban, CSEN 169 - Web Information Management, Winter 2025.
 
@@ -35,7 +35,7 @@ Below is the formula used to calculate the PageRank values for each node:
 
 The algorithm is implemented in JavaScript. Detailed instructions on how to run the script are provided in README.md file. Here is a brief overview:
 
-1. Make sure you have Node.js installed and it's version 18 or later
+1. Make sure you have installed Node.js v18 or later
 2. Unzip the project files and navigate to the project directory
 3. Execute the main script with `./main.js input.txt 0.85`, where the first argument is the input file and the second argument is the teleporting parameter (dumping factor)
 4. If you wish to redirect the output of the script to a file, you can do so by running it with the following command: `./main.js input.txt 0.85 > output.txt`, where `output.txt` is the file name where the output will be written
